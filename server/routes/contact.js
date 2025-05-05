@@ -1,18 +1,19 @@
-import express from "express";
-import Page from "../models/Page.js";
-
+// routes/contact.js
+import express from 'express';
+import Contact from '../models/Contact.js'; // Import the model
 const router = express.Router();
 
-// POST route to save HTML content to MongoDB
-router.post("/save", async (req, res) => {
+// Route to handle form submission
+router.post('/submit', async (req, res) => {
+  const { name, email, phone, message } = req.body;
+
   try {
-    const { htmlContent } = req.body;  // Assuming HTML content will come from request body
-    const newPage = new Page({ htmlContent });
-    await newPage.save();
-    return res.status(201).json({ success: true, message: "HTML content saved!" });
+    const newContact = new Contact({ name, email, phone, message });
+    await newContact.save(); // Save data to MongoDB
+    res.status(201).json({ message: 'Contact form submitted successfully!' });
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ success: false, message: "Failed to save content!" });
+    res.status(500).json({ error: 'Error submitting contact form' });
   }
 });
 

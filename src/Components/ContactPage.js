@@ -1,127 +1,92 @@
-import React, { useState } from "react";
-import successImage from "../assets/404-tick.png";
-import hotelImage1 from '../assets/hotel1.jpg';
-import hotelImage2 from '../assets/hotel2.jpg';
-import hotelImage3 from '../assets/hotel3.jpg';
+import React, { useState } from 'react';
 
 const ContactPage = () => {
   const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    message: "",
+    name: '',
+    email: '',
+    phone: '',
+    message: ''
   });
 
   const [popupVisible, setPopupVisible] = useState(false);
 
-  // Image slider state
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const hotelImages = [hotelImage1, hotelImage2, hotelImage3];  // Array of images
-
-  const handleInputChange = (e) => {
-    const { id, value } = e.target;
-    setFormData((prev) => ({ ...prev, [id]: value }));
+  // Handle form data change
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: value
+    }));
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  // Handle form submission
+  const handleSubmit = async (e) => {
+    e.preventDefault(); // Prevent default form submission (page reload)
 
-    // Optional: integrate backend here
-    console.log("Submitted data:", formData);
+    console.log('Submitted data:', formData); // Log the form data
 
-    // Simulate successful submission
-    setPopupVisible(true);
-  };
+    try {
+      const response = await fetch('http://localhost:8080/api/contact/submit', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData), // Send form data as JSON
+      });
 
-  const handleClosePopup = () => {
-    setPopupVisible(false);
-    setFormData({ name: "", email: "", phone: "", message: "" });
-    window.location.href = "/"; 
-  };
+      const result = await response.json(); // Parse the response as JSON
 
-  // Image navigation functions
-  const nextImage = () => {
-    setCurrentImageIndex((prevIndex) => (prevIndex + 1) % hotelImages.length);
-  };
-
-  const prevImage = () => {
-    setCurrentImageIndex(
-      (prevIndex) => (prevIndex - 1 + hotelImages.length) % hotelImages.length
-    );
+      if (response.ok) {
+        console.log('Success:', result.message); // Log success message
+        setPopupVisible(true); // Show success popup
+      } else {
+        console.error('Error:', result.error); // Log the error from the backend
+      }
+    } catch (error) {
+      console.error('Error:', error); // Catch and log any network or other errors
+    }
   };
 
   return (
-    <section className="contact-form">
-      <div className="container">
-        <div className="form-wrapper">
-          {/* Left Side: Address Info */}
-          <div className="company-address">
-            <div className="address-group">
-              <i className="fas fa-map-marker-alt fa-3x text-red"></i>
-              <h2 className="text-gray md-heading">Location</h2>
-              <p>#Frazer town, Bengaluru, Karnataka 560005</p>
-            </div>
-            <div className="address-group">
-              <i className="fas fa-envelope fa-3x text-red"></i>
-              <h2 className="text-gray md-heading">E-mail</h2>
-              <p>abcd@gmail.com</p>
-            </div>
-            <div className="address-group">
-              <i className="fas fa-phone-square-alt fa-3x text-red"></i>
-              <h2 className="text-gray md-heading">Call</h2>
-              <p>+91 9876543210</p>
-            </div>
-            {/* Image Slider */}
-            <div className="image-slider">
-              <button className="slider-btn prev-btn" onClick={prevImage}>
-                &#10094;
-              </button>
-              <img src={hotelImages[currentImageIndex]} alt="Hotel View" className="hotel-image" />
-              <button className="slider-btn next-btn" onClick={nextImage}>
-                &#10095;
-              </button>
-            </div>
-          </div>
+    <div>
+      <h1>Contact Us</h1>
+      <form onSubmit={handleSubmit}>
+        <input
+          type="text"
+          name="name"
+          placeholder="Your Name"
+          value={formData.name}
+          onChange={handleChange}
+        />
+        <input
+          type="email"
+          name="email"
+          placeholder="Your Email"
+          value={formData.email}
+          onChange={handleChange}
+        />
+        <input
+          type="text"
+          name="phone"
+          placeholder="Your Phone"
+          value={formData.phone}
+          onChange={handleChange}
+        />
+        <textarea
+          name="message"
+          placeholder="Your Message"
+          value={formData.message}
+          onChange={handleChange}
+        />
+        <button type="submit">Submit</button>
+      </form>
 
-          {/* Contact Form */}
-          <form onSubmit={handleSubmit} className="form">
-            <h1 className="lg-heading text-black">Contact Us</h1>
-            <p className="text-gray">Get in touch</p>
-
-            <div className="form-group">
-              <label htmlFor="name">Name</label>
-              <input type="text" id="name" value={formData.name} onChange={handleInputChange} required />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="email">E-mail</label>
-              <input type="email" id="email" value={formData.email} onChange={handleInputChange} required />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="phone">Phone</label>
-              <input type="tel" id="phone" value={formData.phone} onChange={handleInputChange} required />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="message">Message</label>
-              <textarea id="message" value={formData.message} onChange={handleInputChange} required />
-            </div>
-
-            <button type="submit" className="form-btn">Submit</button>
-
-            {popupVisible && (
-              <div className="popup open-popup">
-                <img src={successImage} alt="Success" />
-                <h2>Thank You</h2>
-                <p>Your details have been successfully submitted. We will contact you shortly.</p>
-                <button type="button" onClick={handleClosePopup}>OK</button>
-              </div>
-            )}
-          </form>
+      {popupVisible && (
+        <div>
+          <p>Thank you for reaching out!</p>
         </div>
-      </div>
-    </section>
+      )}
+    </div>
   );
 };
 

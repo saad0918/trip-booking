@@ -1,43 +1,22 @@
-import express from "express";
-import * as dotenv from "dotenv";
-import cors from "cors";
-import mongoose from "mongoose";
-import UserRoutes from "./routes/user.js";
-import PropertyRoutes from "./routes/properties.js";
+import mongoose from 'mongoose';
+import * as dotenv from 'dotenv';
 
-dotenv.config();
-
-const app = express();
-app.use(cors());
-app.use(express.json({ limit: "50mb" }));
-app.use(express.urlencoded({ extended: true })); 
-
-// error handler
-app.use((err, req, res, next) => {
-  const status = err.status || 500;
-  const message = err.message || "Something went wrong";
-  return res.status(status).json({
-    success: false,
-    status,
-    message,
-  });
-});
+dotenv.config(); // Load environment variables from the .env file
 
 const connectDB = () => {
-  mongoose.set("strictQuery", true);
+  mongoose.set('strictQuery', true);
   mongoose
-    .connect(process.env.MONGODB_URL)
-    .then(() => console.log("Connected to Mongo DB"))
+    .connect(process.env.MONGODB_URI)  // Make sure to use MONGODB_URI from .env file
+    .then(() => console.log('Connected to MongoDB'))
     .catch((err) => {
-      console.error("Failed to connect with mongo");
-      console.error(err);
+      console.error('Failed to connect to MongoDB:', err);
     });
 };
 
 const startServer = async () => {
   try {
     connectDB();
-    app.listen(8080, () => console.log("Server started at 8080"));
+    app.listen(8080, () => console.log('Server started at 8080'));
   } catch (error) {
     console.log(error);
   }
